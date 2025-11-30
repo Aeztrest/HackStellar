@@ -163,3 +163,6 @@ MIT License – free for builders, researchers, and open-source Web3 communities
 Owner:
 Ezgin Akyürek
 ezgincapkan64@gmail.com
+
+CREATOR HUB CONTRACT ID = CDBTXCBAHZXUYZUC6IIFSTTDJE67R4UO5B67QEYQDXHKF7TW6VCBMH7B
+
