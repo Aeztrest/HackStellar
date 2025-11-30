@@ -1,0 +1,63 @@
+version: "3.9"
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: stellar_mysql_Aez2
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: stellar_db
+      MYSQL_USER: stellar
+      MYSQL_PASSWORD: stellarpass
+    ports:
+      - "3357:3306"
+    volumes:
+      - db_data_Aez2:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: stellar_phpmyadmin_Aez2
+    restart: unless-stopped
+    environment:
+      PMA_HOST: db
+      PMA_USER: root
+      PMA_PASSWORD: rootpass
+      UPLOAD_LIMIT: 100M
+    ports:
+      - "8357:80"
+    depends_on:
+      - db
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: stellar_backend_Aez2
+    restart: unless-stopped
+    environment:
+      # DB
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: stellar
+      DB_PASSWORD: stellarpass
+      DB_NAME: stellar_db
+
+      # Stellar / Soroban
+      CREATOR_HUB_CONTRACT_ID: "CDWLHIRZI5JZCCGSKWA7EAQISWAHRGYXDQXYTEI77R7XKAHLJNORSHHA"
+      STELLAR_NETWORK: "testnet"
+      STELLAR_ADMIN_ALIAS: "creator-admin"
+
+      # IPFS / Pinata
+      PINATA_JWT: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiJhY2IxYzUyMy05ODFkLTRmNDUtOTgyOS04ZTMwNzdhZDQwZjgiLCJlbWFpbCI6ImV6Z2luY2Fwa2FuNjRAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsInBpbl9wb2xpY3kiOnsicmVnaW9ucyI6W3siZGVzaXJlZFJlcGxpY2F0aW9uQ291bnQiOjEsImlkIjoiRlJBMSJ9LHsiZGVzaXJlZFJlcGxpY2F0aW9uQ291bnQiOjEsImlkIjoiTllDMSJ9XSwidmVyc2lvbiI6MX0sIm1mYV9lbmFibGVkIjpmYWxzZSwic3RhdHVzIjoiQUNUSVZFIn0sImF1dGhlbnRpY2F0aW9uVHlwZSI6InNjb3BlZEtleSIsInNjb3BlZEtleUtleSI6IjEyOTM1YjVhMmFjY2Q1NTMzMDNhIiwic2NvcGVkS2V5U2VjcmV0IjoiMDgwZjhhZjVkNmQ3YmJiMTJjMWVkYzdlNDdiNmMzYjY2YmFiNDJjZTI1YjI4Y2ExYzhlZGIxZTY0YWFlNGNlNiIsImV4cCI6MTc5NTk1NjQ3N30.0O3mgXxR00Si_MD9RyqRej0s463CqPMUtAR27aE0ySI"   # <-- kendi JWT'ni buraya koy
+      IPFS_GATEWAY: "bronze-negative-tiglon-986.mypinata.cloud"
+
+    volumes:
+      - ./backend/app:/app/app   # Kod mount
+    ports:
+      - "8032:8000"              # HOST:8032 -> CONTAINER:8000
+    depends_on:
+      - db
+
+volumes:
+  db_data_Aez2:
