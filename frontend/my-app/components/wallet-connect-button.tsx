@@ -1,23 +1,18 @@
 "use client"
 
-import { useState } from "react"
 import { useWallet } from "@/contexts/wallet-context"
 import { Button } from "@/components/ui/button"
 
 export function WalletConnectButton() {
-  const { publicKey, isConnected, isConnecting, connect, disconnect } = useWallet()
-  const [error, setError] = useState<string | null>(null)
+  const { publicKey, isConnected, isConnecting, connect, disconnect, error } = useWallet()
 
   const handleConnect = async () => {
     try {
-      setError(null)
       console.log("[v0] Connection attempt started - Freighter popup should open")
       await connect()
       console.log("[v0] Successfully connected!")
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to connect wallet"
-      console.error("[v0] Connection error:", errorMessage)
-      setError(errorMessage)
+      console.error("[v0] Connection error:", err)
     }
   }
 

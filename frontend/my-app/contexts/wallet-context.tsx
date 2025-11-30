@@ -1,3 +1,4 @@
+// Wallet context for managing Freighter connection and user state
 "use client"
 
 import type React from "react"
@@ -9,33 +10,31 @@ const WalletContext = createContext<WalletContextType | undefined>(undefined)
 export function WalletProvider({ children }: { children: React.ReactNode }) {
   const [publicKey, setPublicKey] = useState<string | null>(null)
   const [isConnecting, setIsConnecting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const connect = useCallback(async () => {
     setIsConnecting(true)
+    setError(null)
     try {
-      const { isConnected, getAddress } = await import("@stellar/freighter-api")
+      const { requestAccess } = await import("@stellar/freighter-api")
 
-      // Check if Freighter is available
-      const connectionStatus = await isConnected()
-      console.log("[v0] Freighter connection status:", connectionStatus)
+      console.log("[v0] Requesting Freighter access - popup should appear")
 
-      if (!connectionStatus.isConnected) {
-        throw new Error(
-          "Freighter wallet not connected. Please install the Freighter extension and authorize this site.",
-        )
+      // requestAccess() will open the Freighter popup for user authorization
+      const accessObj = await requestAccess()
+
+      if (accessObj.error) {
+        throw new Error(accessObj.error)
       }
 
-      const addressResult = await getAddress()
-      if (addressResult.error) {
-        throw new Error(addressResult.error)
-      }
-
-      const pk = addressResult.address
-      console.log("[v0] Connected to wallet:", pk)
+      const pk = accessObj.address
+      console.log("[v0] Successfully connected to wallet:", pk)
       setPublicKey(pk)
-    } catch (error) {
-      console.error("[v0] Failed to connect wallet:", error)
-      throw error
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to connect wallet"
+      console.error("[v0] Failed to connect wallet:", errorMessage)
+      setError(errorMessage)
+      throw err
     } finally {
       setIsConnecting(false)
     }
@@ -43,6 +42,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 
   const disconnect = useCallback(() => {
     setPublicKey(null)
+    setError(null)
     console.log("[v0] Wallet disconnected")
   }, [])
 
@@ -54,6 +54,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         connect,
         disconnect,
         isConnecting,
+        error,
       }}
     >
       {children}

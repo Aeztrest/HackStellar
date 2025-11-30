@@ -1,9 +1,11 @@
+// Type definitions for the Web3 Creator Hub platform
 export interface WalletContextType {
   publicKey: string | null
   isConnected: boolean
   connect: () => Promise<void>
   disconnect: () => void
   isConnecting: boolean
+  error: string | null
 }
 
 export interface CreatedContent {
